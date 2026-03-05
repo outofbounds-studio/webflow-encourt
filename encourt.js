@@ -418,12 +418,20 @@
                 ((mouseX - buttonCenterX) / (buttonWidth / 2)) * 50;
             offsetXFromCenter = Math.abs(offsetXFromCenter);
 
-            const circle = button.querySelector('.btn__circle');
+            // Support both .btn__circle and .btn_circle (Webflow can output either)
+            const circle =
+                button.querySelector('.btn__circle') ||
+                button.querySelector('.btn_circle') ||
+                button.querySelector('[class*="circle-wrap"] > div');
             if (!circle) return;
 
-            circle.style.left = `${offsetXFromLeft.toFixed(1)}%`;
-            circle.style.top = `${offsetYFromTop.toFixed(1)}%`;
-            circle.style.width = `${115 + offsetXFromCenter * 2}%`;
+            const leftPct = offsetXFromLeft.toFixed(1) + '%';
+            const topPct = offsetYFromTop.toFixed(1) + '%';
+            const widthPct = (115 + offsetXFromCenter * 2) + '%';
+
+            circle.style.setProperty('left', leftPct);
+            circle.style.setProperty('top', topPct);
+            circle.style.setProperty('width', widthPct);
         }
 
         buttons.forEach((button) => {
