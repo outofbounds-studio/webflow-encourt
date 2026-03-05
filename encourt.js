@@ -30,12 +30,17 @@
 
     // Add dependencies here when needed (e.g. GSAP, Swiper)
     async function loadDependencies() {
-        const dependencies = [
-            // 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js',
+        const cssDependencies = [
+            'https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css',
         ];
-        if (dependencies.length === 0) return true;
+        const scriptDependencies = [
+            'https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js',
+        ];
+        const hasDeps = cssDependencies.length > 0 || scriptDependencies.length > 0;
+        if (!hasDeps) return true;
         try {
-            await Promise.all(dependencies.map(src => loadScript(src)));
+            await Promise.all(cssDependencies.map((href) => loadCSS(href)));
+            await Promise.all(scriptDependencies.map((src) => loadScript(src)));
             console.log('[Encourt] Dependencies loaded');
             return true;
         } catch (error) {
@@ -440,6 +445,39 @@
         });
     }
 
+    // Swiper slider feature
+    function initSwiperSlider() {
+        if (typeof Swiper === 'undefined') return;
+        const swiperSliderGroups = document.querySelectorAll('[data-swiper-group]');
+        swiperSliderGroups.forEach((swiperGroup) => {
+            const swiperSliderWrap = swiperGroup.querySelector('[data-swiper-wrap]');
+            if (!swiperSliderWrap) return;
+
+            const prevButton = swiperGroup.querySelector('[data-swiper-prev]');
+            const nextButton = swiperGroup.querySelector('[data-swiper-next]');
+            const paginationEl = swiperGroup.querySelector('.swiper-pagination');
+
+            const swiper = new Swiper(swiperSliderWrap, {
+                slidesPerView: 1.25,
+                speed: 600,
+                mousewheel: true,
+                grabCursor: true,
+                breakpoints: {
+                    480: { slidesPerView: 1.8 },
+                    992: { slidesPerView: 3.5 },
+                },
+                navigation: {
+                    nextEl: nextButton,
+                    prevEl: prevButton,
+                },
+                pagination: paginationEl
+                    ? { el: paginationEl, type: 'bullets', clickable: true }
+                    : false,
+                keyboard: { enabled: true, onlyInViewport: false },
+            });
+        });
+    }
+
     // Initialize all Encourt features
     function initEncourt() {
         try {
@@ -448,6 +486,7 @@
             initImageCycle();
             initAdvancedFormValidation();
             initDirectionalButtonHover();
+            initSwiperSlider();
             console.log('[Encourt] Initialized');
         } catch (error) {
             console.error('[Encourt] Init error:', error);
