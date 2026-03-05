@@ -44,11 +44,69 @@
         }
     }
 
+    // Image cycle feature
+    function initImageCycle() {
+        document.querySelectorAll('[data-image-cycle]').forEach((cycleElement) => {
+            const items = cycleElement.querySelectorAll('[data-image-cycle-item]');
+            if (items.length < 2) return;
+
+            let currentIndex = 0;
+            let intervalId;
+
+            // Get optional custom duration (in seconds), fallback to 2000ms
+            const attrValue = cycleElement.getAttribute('data-image-cycle');
+            const duration =
+                attrValue && !isNaN(attrValue) ? parseFloat(attrValue) * 1000 : 2000;
+            const isTwoItems = items.length === 2;
+
+            // Initial state
+            items.forEach((item, i) => {
+                item.setAttribute(
+                    'data-image-cycle-item',
+                    i === 0 ? 'active' : 'not-active'
+                );
+            });
+
+            function cycleImages() {
+                const prevIndex = currentIndex;
+                currentIndex = (currentIndex + 1) % items.length;
+
+                items[prevIndex].setAttribute('data-image-cycle-item', 'previous');
+
+                if (!isTwoItems) {
+                    setTimeout(() => {
+                        items[prevIndex].setAttribute(
+                            'data-image-cycle-item',
+                            'not-active'
+                        );
+                    }, duration);
+                }
+
+                items[currentIndex].setAttribute('data-image-cycle-item', 'active');
+            }
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting && !intervalId) {
+                        intervalId = setInterval(cycleImages, duration);
+                    } else if (!entry.isIntersecting && intervalId) {
+                        clearInterval(intervalId);
+                        intervalId = null;
+                    }
+                },
+                { threshold: 0 }
+            );
+
+            observer.observe(cycleElement);
+        });
+    }
+
     // Initialize all Encourt features
     function initEncourt() {
         try {
             // Add your feature initializers here
             // initSomeFeature();
+            initImageCycle();
             console.log('[Encourt] Initialized');
         } catch (error) {
             console.error('[Encourt] Init error:', error);
