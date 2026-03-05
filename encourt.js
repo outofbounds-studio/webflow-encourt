@@ -182,8 +182,8 @@
                         valid = false;
                     }
                 } else if (input.type === 'email') {
-                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    valid = emailPattern.test(value);
+                    // Use native validity so standard emails always pass (avoids regex/cache issues)
+                    valid = value.length > 0 && input.validity.valid;
                 } else {
                     if (input.hasAttribute('min') && length < min) valid = false;
                     if (input.hasAttribute('max') && length > max) valid = false;
