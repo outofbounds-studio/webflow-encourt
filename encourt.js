@@ -1,5 +1,6 @@
 // encourt.js - Encourt Website Scripts
 // Version: 1.0.0
+// Date: 2026-03-06
 
 (function() {
     'use strict';
