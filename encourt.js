@@ -459,11 +459,17 @@
             const prevButton = swiperGroup.querySelector('[data-swiper-prev]');
             const nextButton = swiperGroup.querySelector('[data-swiper-next]');
             const paginationEl = swiperGroup.querySelector('.swiper-pagination');
+            const autoplayDelay =
+                parseInt(swiperGroup.getAttribute('data-swiper-delay'), 10) || 3000;
 
             const swiper = new Swiper(swiperSliderWrap, {
                 slidesPerView: 1.25,
                 speed: 600,
                 grabCursor: true,
+                autoplay: {
+                    delay: autoplayDelay,
+                    disableOnInteraction: false,
+                },
                 breakpoints: {
                     480: { slidesPerView: 1.8 },
                     992: { slidesPerView: 3.5 },
@@ -477,6 +483,23 @@
                     : false,
                 keyboard: { enabled: true, onlyInViewport: false },
             });
+
+            if (swiper.autoplay) {
+                swiper.autoplay.stop();
+
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (entry.isIntersecting) {
+                            swiper.autoplay.start();
+                        } else {
+                            swiper.autoplay.stop();
+                        }
+                    },
+                    { threshold: 0.2 }
+                );
+
+                observer.observe(swiperGroup);
+            }
         });
     }
 
