@@ -463,7 +463,6 @@
             const swiper = new Swiper(swiperSliderWrap, {
                 slidesPerView: 1.25,
                 speed: 600,
-                mousewheel: true,
                 grabCursor: true,
                 breakpoints: {
                     480: { slidesPerView: 1.8 },
