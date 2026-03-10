@@ -693,11 +693,20 @@
 
         const navHeight = navBar.offsetHeight || 0;
 
+        function updateLogoColorState() {
+            const sectionRect = triggerSection.getBoundingClientRect();
+            const navRect = navBar.getBoundingClientRect();
+            const navBottom = navRect.bottom;
+            const isOverDark =
+                navBottom >= sectionRect.top && navBottom <= sectionRect.bottom;
+            document.body.classList.toggle('is-logo-dark', isOverDark);
+        }
+
         const observer = new IntersectionObserver(
             ([entry]) => {
                 // Intersection here means: the dark section has reached
-                // the nav's bottom edge (we shifted the root with rootMargin).
-                document.body.classList.toggle('is-logo-dark', entry.isIntersecting);
+                // the nav's bottom edge region; use geometry check for robustness.
+                updateLogoColorState();
             },
             {
                 threshold: 0,
@@ -707,6 +716,9 @@
                 rootMargin: `-${navHeight}px 0px 0px 0px`,
             }
         );
+
+        // Ensure correct initial state on load (e.g. when refreshing mid-page)
+        updateLogoColorState();
 
         observer.observe(triggerSection);
     }
