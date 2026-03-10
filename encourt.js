@@ -676,6 +676,25 @@
         return () => ctx.revert();
     }
 
+    // Logo color toggle over a specific section (desktop / tablet only)
+    function initLogoColorScrollToggle() {
+        const triggerSection = document.querySelector('[data-logo-dark-section]');
+        const logo = document.querySelector('.nav-logo');
+        if (!triggerSection || !logo) return;
+
+        const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+        if (isMobile()) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                document.body.classList.toggle('is-logo-dark', entry.isIntersecting);
+            },
+            { threshold: 0.2 }
+        );
+
+        observer.observe(triggerSection);
+    }
+
     // Initialize all Encourt features
     function initEncourt() {
         try {
@@ -686,6 +705,7 @@
             initDirectionalButtonHover();
             initSwiperSlider();
             initContentRevealScroll();
+            initLogoColorScrollToggle();
             console.log('[Encourt] Initialized');
         } catch (error) {
             console.error('[Encourt] Init error:', error);
