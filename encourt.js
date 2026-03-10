@@ -676,51 +676,59 @@
         return () => ctx.revert();
     }
 
-    // Logo color toggle over a specific section, based on nav bottom (desktop / tablet only)
+    // Logo / nav theme based on section under nav bottom (desktop / tablet only)
+    // Uses Osmo-style [data-theme-section] / [data-theme-nav] attributes.
     function initLogoColorScrollToggle() {
-        const triggerSection = document.querySelector('[data-logo-dark-section]');
         const logo = document.querySelector('.nav-logo');
-        if (!triggerSection || !logo) return;
+        const themeSections = document.querySelectorAll('[data-theme-section]');
+        if (!logo || !themeSections.length) return;
 
         const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
         if (isMobile()) return;
 
-        // Try to use an explicit nav container if you add data-nav-bar,
-        // otherwise fall back to the closest <nav> ancestor.
+        // Detection offset: bottom of the nav bar
         const navBar =
-            logo.closest('[data-nav-bar]') || logo.closest('nav');
+            document.querySelector('[data-nav-bar-height]') ||
+            logo.closest('[data-nav-bar]') ||
+            logo.closest('nav');
         if (!navBar) return;
 
-        const navHeight = navBar.offsetHeight || 0;
+        const defaultTheme =
+            document.body.getAttribute('data-theme-nav-default') || 'light';
 
-        function updateLogoColorState() {
-            const sectionRect = triggerSection.getBoundingClientRect();
-            const navRect = navBar.getBoundingClientRect();
-            const navBottom = navRect.bottom;
-            const isOverDark =
-                navBottom >= sectionRect.top && navBottom <= sectionRect.bottom;
-            document.body.classList.toggle('is-logo-dark', isOverDark);
+        function applyTheme(theme) {
+            const nextTheme = theme || defaultTheme;
+            if (document.body.getAttribute('data-theme-nav') !== nextTheme) {
+                document.body.setAttribute('data-theme-nav', nextTheme);
+                document.body.classList.toggle('is-logo-dark', nextTheme === 'dark');
+            }
         }
 
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                // Intersection here means: the dark section has reached
-                // the nav's bottom edge region; use geometry check for robustness.
-                updateLogoColorState();
-            },
-            {
-                threshold: 0,
-                root: null,
-                // Shift the top of the viewport up by nav height so "enter"
-                // happens when the section touches the nav bottom.
-                rootMargin: `-${navHeight}px 0px 0px 0px`,
-            }
-        );
+        function checkThemeSection() {
+            const navRect = navBar.getBoundingClientRect();
+            const offset = navRect.bottom; // distance from top of viewport to nav bottom
 
-        // Ensure correct initial state on load (e.g. when refreshing mid-page)
-        updateLogoColorState();
+            let activeTheme = null;
 
-        observer.observe(triggerSection);
+            themeSections.forEach((section) => {
+                const rect = section.getBoundingClientRect();
+                const sectionTop = rect.top;
+                const sectionBottom = rect.bottom;
+
+                if (sectionTop <= offset && sectionBottom >= offset) {
+                    activeTheme = section.getAttribute('data-theme-section');
+                }
+            });
+
+            applyTheme(activeTheme);
+        }
+
+        // Initial state and listeners
+        applyTheme(defaultTheme);
+        checkThemeSection();
+
+        document.addEventListener('scroll', checkThemeSection, { passive: true });
+        window.addEventListener('resize', checkThemeSection);
     }
 
     // Initialize all Encourt features
