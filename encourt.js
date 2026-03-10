@@ -676,7 +676,7 @@
         return () => ctx.revert();
     }
 
-    // Logo color toggle over a specific section (desktop / tablet only)
+    // Logo color toggle over a specific section, based on nav bottom (desktop / tablet only)
     function initLogoColorScrollToggle() {
         const triggerSection = document.querySelector('[data-logo-dark-section]');
         const logo = document.querySelector('.nav-logo');
@@ -685,11 +685,27 @@
         const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
         if (isMobile()) return;
 
+        // Try to use an explicit nav container if you add data-nav-bar,
+        // otherwise fall back to the closest <nav> ancestor.
+        const navBar =
+            logo.closest('[data-nav-bar]') || logo.closest('nav');
+        if (!navBar) return;
+
+        const navHeight = navBar.offsetHeight || 0;
+
         const observer = new IntersectionObserver(
             ([entry]) => {
+                // Intersection here means: the dark section has reached
+                // the nav's bottom edge (we shifted the root with rootMargin).
                 document.body.classList.toggle('is-logo-dark', entry.isIntersecting);
             },
-            { threshold: 0.2 }
+            {
+                threshold: 0,
+                root: null,
+                // Shift the top of the viewport up by nav height so "enter"
+                // happens when the section touches the nav bottom.
+                rootMargin: `-${navHeight}px 0px 0px 0px`,
+            }
         );
 
         observer.observe(triggerSection);
