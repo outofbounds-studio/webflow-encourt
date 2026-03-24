@@ -460,7 +460,7 @@
             const nextButton = swiperGroup.querySelector('[data-swiper-next]');
             const paginationEl = swiperGroup.querySelector('.swiper-pagination');
             const autoplayDelay =
-                parseInt(swiperGroup.getAttribute('data-swiper-delay'), 10) || 3000;
+                parseInt(swiperGroup.getAttribute('data-swiper-delay'), 10) || 5000;
 
             const swiper = new Swiper(swiperSliderWrap, {
                 slidesPerView: 1.25,
