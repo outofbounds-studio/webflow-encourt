@@ -731,6 +731,58 @@
         window.addEventListener('resize', checkThemeSection);
     }
 
+    const BSPORT_WIDGET_PARENT_ID = 'bsport-widget-528371';
+    const BSPORT_CDN_URL = 'https://cdn.bsport.io/scripts/widget.js';
+    const BSPORT_SCRIPT_ID = 'bsport-widget-cdn';
+
+    function loadBsportScript() {
+        if (window.BsportWidget || document.getElementById(BSPORT_SCRIPT_ID)) {
+            return Promise.resolve();
+        }
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.id = BSPORT_SCRIPT_ID;
+            script.src = BSPORT_CDN_URL;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    function mountBsportWidget(config, repeat = 1) {
+        if (repeat > 50) return;
+        if (!window.BsportWidget) {
+            return setTimeout(() => {
+                mountBsportWidget(config, repeat + 1);
+            }, 100 * repeat || 1);
+        }
+        window.BsportWidget.mount(config);
+    }
+
+    function initBsportWidget() {
+        if (!document.getElementById(BSPORT_WIDGET_PARENT_ID)) return;
+
+        loadBsportScript()
+            .then(() => {
+                mountBsportWidget({
+                    parentElement: BSPORT_WIDGET_PARENT_ID,
+                    companyId: 5802,
+                    franchiseId: null,
+                    dialogMode: 1,
+                    widgetType: 'calendar',
+                    showFab: false,
+                    fullScreenPopup: false,
+                    styles: undefined,
+                    config: {
+                        calendar: {},
+                    },
+                });
+            })
+            .catch((error) => {
+                console.error('[Encourt] BSport widget failed to load:', error);
+            });
+    }
+
     // Initialize all Encourt features
     function initEncourt() {
         try {
@@ -742,6 +794,7 @@
             initSwiperSlider();
             initContentRevealScroll();
             initLogoColorScrollToggle();
+            initBsportWidget();
             console.log('[Encourt] Initialized');
         } catch (error) {
             console.error('[Encourt] Init error:', error);
